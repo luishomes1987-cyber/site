@@ -1,4 +1,6 @@
 // Server-side storage para manter dados em memória compartilhados entre rotas
+import { loadProducts, saveProducts, loadOrders, saveOrders } from "./file-storage"
+
 export interface Product {
   id: string
   name: string
@@ -42,51 +44,8 @@ export interface Order {
 }
 
 const serverStorage = {
-  products: [
-    {
-      id: "5",
-      name: "AirPods Pro",
-      brand: "Apple",
-      description: "Cancelamento ativo de ruído, modo de transparência e áudio espacial",
-      price: 249.99,
-      image: "/apple-airpods-pro-white.jpg",
-      category: "Airpods",
-      inStock: true,
-    },
-    {
-      id: "6",
-      name: "Vape Descartável Triple Flavor",
-      brand: "Premium",
-      description: "3 sabores distintos num único dispositivo premium",
-      price: 12.99,
-      image: "/colorful-disposable-vape-pen.jpg",
-      category: "Vapes",
-      flavors: 3,
-      inStock: true,
-    },
-    {
-      id: "7",
-      name: "AirPods Max",
-      brand: "Apple",
-      description: "Auscultadores premium com cancelamento de ruído e áudio de alta fidelidade",
-      price: 549.99,
-      image: "/apple-airpods-max-silver-headphones.jpg",
-      category: "Airpods",
-      inStock: true,
-    },
-    {
-      id: "8",
-      name: "Vape Premium Six Flavor",
-      brand: "Premium",
-      description: "Dispositivo premium com 6 sabores diferentes para máxima variedade",
-      price: 34.99,
-      image: "/modern-premium-vape-device.jpg",
-      category: "Vapes",
-      flavors: 6,
-      inStock: true,
-    },
-  ] as Product[],
-  orders: [] as Order[],
+  products: loadProducts(),
+  orders: loadOrders(),
 }
 
 // Product operations
@@ -100,6 +59,7 @@ export const createProduct = (product: Omit<Product, "id">) => {
     id: `PROD-${Date.now()}-${Math.random().toString(36).substring(2, 9).toUpperCase()}`,
   }
   serverStorage.products.push(newProduct)
+  saveProducts(serverStorage.products)
   console.log("[v0] Product created:", newProduct.id, newProduct.name)
   return newProduct
 }
@@ -109,6 +69,7 @@ export const updateProduct = (id: string, updates: Partial<Product>) => {
   if (index === -1) return null
 
   serverStorage.products[index] = { ...serverStorage.products[index], ...updates }
+  saveProducts(serverStorage.products)
   console.log("[v0] Product updated:", id, serverStorage.products[index].name)
   return serverStorage.products[index]
 }
@@ -118,6 +79,7 @@ export const deleteProduct = (id: string) => {
   if (index === -1) return false
 
   const deletedProduct = serverStorage.products.splice(index, 1)[0]
+  saveProducts(serverStorage.products)
   console.log("[v0] Product deleted:", deletedProduct.id, deletedProduct.name)
   return true
 }
@@ -135,6 +97,7 @@ export const createOrder = (order: Omit<Order, "id" | "createdAt" | "status">) =
     createdAt: new Date().toISOString(),
   }
   serverStorage.orders.push(newOrder)
+  saveOrders(serverStorage.orders)
   console.log("[v0] Order created:", newOrder.id, "Customer:", newOrder.customer.name)
   return newOrder
 }
@@ -144,6 +107,7 @@ export const updateOrder = (id: string, updates: Partial<Order>) => {
   if (index === -1) return null
 
   serverStorage.orders[index] = { ...serverStorage.orders[index], ...updates }
+  saveOrders(serverStorage.orders)
   console.log("[v0] Order updated:", id, serverStorage.orders[index].status)
   return serverStorage.orders[index]
 }
